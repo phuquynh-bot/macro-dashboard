@@ -1,0 +1,36 @@
+name: Auto Macro Report Weekly
+
+on:
+  schedule:
+    # 01:00 UTC = 08:00 sáng Thứ Hai giờ Việt Nam (UTC+7)
+    - cron: '0 1 * * 1'
+  workflow_dispatch: # Cho phép nhấn nút bấm chạy thử bất cứ lúc nào
+
+jobs:
+  run-collector:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Lấy mã nguồn
+        uses: actions/checkout@v4
+
+      - name: Thiết lập môi trường Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cài thư viện Google GenAI
+        run: pip install google-genai
+
+      - name: Chạy script cập nhật
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python update_macro.py
+
+      - name: Tự động lưu dữ liệu mới vào kho
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add macro_data.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto update macro data" && git push)
