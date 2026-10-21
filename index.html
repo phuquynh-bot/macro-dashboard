@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Báo Cáo Vĩ Mô Hàng Tuần</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-6 font-sans">
+  <div class="max-w-5xl mx-auto">
+    <header class="border-b border-slate-700 pb-4 mb-6 flex justify-between items-end">
+      <div>
+        <h1 class="text-3xl font-bold text-sky-400">Báo Cáo Vĩ Mô Hàng Tuần</h1>
+        <p class="text-sm text-slate-400 mt-1">Cập nhật tự động mỗi 08:00 sáng Thứ Hai</p>
+      </div>
+      <div id="update-time" class="text-xs bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg text-slate-300">
+        Đang tải ngày...
+      </div>
+    </header>
+
+    <!-- AI Summary -->
+    <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-5 mb-8 shadow-lg">
+      <h2 class="text-sm font-semibold uppercase tracking-wider text-sky-300 mb-2">Tổng Quan Tuần (AI Tổng Hợp)</h2>
+      <p id="ai-summary" class="text-slate-300 leading-relaxed text-sm">Đang tải tóm tắt thị trường...</p>
+    </div>
+
+    <!-- 4 Khối dữ liệu -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <!-- Lãi suất -->
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-5">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-xs text-slate-400 uppercase font-semibold">Lãi Suất Qua Đêm</span>
+          <span id="rate-delta" class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">--</span>
+        </div>
+        <div id="rate-value" class="text-2xl font-bold text-white mb-2">--</div>
+        <p id="rate-detail" class="text-xs text-slate-400 leading-relaxed">Đang tải...</p>
+      </div>
+
+      <!-- Tỷ giá -->
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-5">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-xs text-slate-400 uppercase font-semibold">Tỷ Giá USD/VND (VCB)</span>
+          <span id="fx-delta" class="text-xs px-2 py-0.5 rounded bg-rose-500/20 text-rose-400">--</span>
+        </div>
+        <div id="fx-value" class="text-2xl font-bold text-white mb-2">--</div>
+        <p id="fx-detail" class="text-xs text-slate-400 leading-relaxed">Đang tải...</p>
+      </div>
+
+      <!-- Giá vàng -->
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-5">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-xs text-slate-400 uppercase font-semibold">Giá Vàng SJC (Trđ/lượng)</span>
+          <span id="gold-world" class="text-xs text-amber-400">Spot: --</span>
+        </div>
+        <div id="gold-value" class="text-2xl font-bold text-white mb-2">--</div>
+        <p id="gold-detail" class="text-xs text-slate-400 leading-relaxed">Đang tải...</p>
+      </div>
+
+      <!-- Bất động sản -->
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-5">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-xs text-slate-400 uppercase font-semibold">Bất Động Sản</span>
+          <span id="re-status" class="text-xs px-2 py-0.5 rounded bg-sky-500/20 text-sky-400">Thanh khoản</span>
+        </div>
+        <div id="re-value" class="text-2xl font-bold text-white mb-2">--</div>
+        <p id="re-detail" class="text-xs text-slate-400 leading-relaxed">Đang tải...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    fetch('macro_data.json')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('update-time').innerText = 'Kỳ báo cáo: ' + data.updated_at;
+        document.getElementById('ai-summary').innerText = data.ai_summary;
+        
+        document.getElementById('rate-value').innerText = data.interest_rate.overnight;
+        document.getElementById('rate-delta').innerText = data.interest_rate.delta_percent;
+        document.getElementById('rate-detail').innerText = data.interest_rate.detail;
+
+        document.getElementById('fx-value').innerText = data.fx.rate_vcb;
+        document.getElementById('fx-delta').innerText = data.fx.delta_percent;
+        document.getElementById('fx-detail').innerText = data.fx.detail;
+
+        document.getElementById('gold-value').innerText = data.gold.sjc_price;
+        document.getElementById('gold-world').innerText = 'Spot: $' + data.gold.world_price + '/oz';
+        document.getElementById('gold-detail').innerText = data.gold.detail;
+
+        document.getElementById('re-value').innerText = data.real_estate.liquidity_note;
+        document.getElementById('re-detail').innerText = data.real_estate.detail;
+      })
+      .catch(err => {
+        document.getElementById('ai-summary').innerText = 'Đang đợi dữ liệu lần chạy đầu tiên từ hệ thống...';
+      });
+  </script>
+</body>
+</html>
